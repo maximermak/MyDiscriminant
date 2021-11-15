@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -72,11 +71,11 @@ public class MainActivity2 extends AppCompatActivity {
                         contentValues.put(DBHelper.KEY_A, a);
                         contentValues.put(DBHelper.KEY_B, b);
                         contentValues.put(DBHelper.KEY_C, c);
-                        database.insert(DBHelper.TABLE_NAME, null, contentValues);
+                        database.insert(DBHelper.TABLE_ABC, null, contentValues);
                         toSee.setText(Discriminant.discText(a, b, c));
 
 
-                        Cursor cursor = database.query(DBHelper.TABLE_NAME, null,null,null,null,null,null);
+                        Cursor cursor = database.query(DBHelper.TABLE_ABC, null,null,null,null,null,null);
                         if(cursor.moveToFirst())
                         {
                             int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);

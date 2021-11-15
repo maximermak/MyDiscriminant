@@ -2,27 +2,29 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 public class MainActivity extends AppCompatActivity {
 
+    String nowPass, nowLog;
     Button entBut;
-    TextView password, login, error;
-    public int score = 0;
+    TextView password, login, error, signUp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        signUp = (TextView) findViewById(R.id.sign_up);
 
         error = (TextView) findViewById(R.id.error);
 
@@ -34,43 +36,68 @@ public class MainActivity extends AppCompatActivity {
 
         login = (TextView) findViewById(R.id.editTextTextEmailAddress);
 
+        DBHelper dbHelper = new DBHelper(this);
+
+        SQLiteDatabase database1 = dbHelper.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+
+        Intent intentRegistration = new Intent(this, MainActivity5.class);
+
         Intent intent = new Intent(this, MainActivity2.class);
 
-        String myLog = "admin";
 
-        String myPass = "admin";
-
-
-
-
-        String nowPass = password.getText().toString();
+        signUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(intentRegistration);
+            }
+        });
 
         entBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(myLog.equals(login.getText().toString()) && myPass.equals(password.getText().toString()) && score < 4)
-                {
-                    startActivity(intent);
-                }
-                else
-                {
-                    Handler myHandler = new Handler();
-                    myHandler.postDelayed(new Runnable() {
-                        public void run() {
-                        System.out.println(1);
-                        score = 0;
-                        }
-                    }, 5000);
-                    score++;
-                    error.setText("Неправильный логин или пароль.");
-                    if(score > 4)
-                    {
-                        error.setText("Повторите позже.");
-                    }
-                }
 
+                Cursor cursor1 = database1.query(DBHelper.TABLE_LP, null,null,null,null,null,null);
+
+                if(cursor1.moveToFirst()) {
+                    int loginIndex = cursor1.getColumnIndex(DBHelper.LOGIN);
+                    int passwordIndex = cursor1.getColumnIndex(DBHelper.PASSWORD);
+                    do {
+                        System.out.println(1);
+                    }
+                    while (cursor1.moveToNext());
+                }
             }
         });
+
+//        entBut.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+
+//                Cursor cursor = database.query(DBHelper.TABLE_LP, null,null,null,null,null,null);
+//                nowLog = login.getText().toString();
+//                nowPass = login.getText().toString();
+//                if(cursor.moveToFirst())
+//                {
+//                    int loginIndex = cursor.getColumnIndex(DBHelper.LOGIN);
+//                    int passwordIndex = cursor.getColumnIndex(DBHelper.PASSWORD);
+//                    do {
+//                        String tmpLogin = "" + cursor.getInt(loginIndex);
+//                        String tmpPassword = "" + cursor.getInt(passwordIndex);
+//                            if(nowLog.equals(tmpLogin) && nowPass.equals(tmpPassword))
+//                            {
+//                                startActivity(intent);
+//                            }
+//                    }
+//                    while(cursor.moveToNext());
+//                }
+//                else {
+//                    error.setText("Неправильный логин или пароль.");
+//                }
+//
+//            }
+//        });
 
 
     }
