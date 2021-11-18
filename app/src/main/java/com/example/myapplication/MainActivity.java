@@ -24,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        DBHelper dbHelper = new DBHelper(this);
+
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
         signUp = (TextView) findViewById(R.id.sign_up);
 
         error = (TextView) findViewById(R.id.error);
@@ -36,11 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         login = (TextView) findViewById(R.id.editTextTextEmailAddress);
 
-        DBHelper dbHelper = new DBHelper(this);
 
-        SQLiteDatabase database1 = dbHelper.getWritableDatabase();
-
-        ContentValues contentValues = new ContentValues();
 
         Intent intentRegistration = new Intent(this, MainActivity5.class);
 
@@ -58,46 +58,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Cursor cursor1 = database1.query(DBHelper.TABLE_LP, null,null,null,null,null,null);
-
-                if(cursor1.moveToFirst()) {
-                    int loginIndex = cursor1.getColumnIndex(DBHelper.LOGIN);
-                    int passwordIndex = cursor1.getColumnIndex(DBHelper.PASSWORD);
-                    do {
-                        System.out.println(1);
+                nowLog = login.getText().toString();
+                nowPass = password.getText().toString();
+                if(!nowLog.trim().equals("") && !nowPass.trim().equals("")) {
+                    Cursor cursor = database.query(DBHelper.TABLE_CONTACTS, null, null, null,
+                            null, null, null);
+                    if (cursor.moveToFirst()) {
+                        do {
+                            int logIndex = cursor.getColumnIndex(DBHelper.KEY_LOGIN);
+                            int passIndex = cursor.getColumnIndex(DBHelper.KEY_PASSWORD);
+                            if (nowLog.equals(cursor.getString(logIndex)) && nowPass.equals(cursor.getString(passIndex))) {
+                                startActivity(intent);
+                            }
+                        } while (cursor.moveToNext());
+                    } else {
+                        error.setText("Неравильный логин или пароль..");
+                        cursor.close();
                     }
-                    while (cursor1.moveToNext());
+
+
+
+                }
+                else{
+                    error.setText("Введите логин и пароль..");
                 }
             }
         });
-
-//        entBut.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-
-//                Cursor cursor = database.query(DBHelper.TABLE_LP, null,null,null,null,null,null);
-//                nowLog = login.getText().toString();
-//                nowPass = login.getText().toString();
-//                if(cursor.moveToFirst())
-//                {
-//                    int loginIndex = cursor.getColumnIndex(DBHelper.LOGIN);
-//                    int passwordIndex = cursor.getColumnIndex(DBHelper.PASSWORD);
-//                    do {
-//                        String tmpLogin = "" + cursor.getInt(loginIndex);
-//                        String tmpPassword = "" + cursor.getInt(passwordIndex);
-//                            if(nowLog.equals(tmpLogin) && nowPass.equals(tmpPassword))
-//                            {
-//                                startActivity(intent);
-//                            }
-//                    }
-//                    while(cursor.moveToNext());
-//                }
-//                else {
-//                    error.setText("Неправильный логин или пароль.");
-//                }
-//
-//            }
-//        });
 
 
     }

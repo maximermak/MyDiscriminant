@@ -18,13 +18,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 public class MainActivity2 extends AppCompatActivity {
     int a,b,c;
     String accumulate = "";
-    Button read;
     FloatingActionButton nextPage;
     TextView tvA, tvB, tvC, toSee;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+
+        DBHelper dbHelper = new DBHelper(this);
+
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
 
         nextPage = (FloatingActionButton) findViewById(R.id.page12);
 
@@ -34,19 +39,10 @@ public class MainActivity2 extends AppCompatActivity {
 
         tvC = (TextView) findViewById(R.id.tieC);
 
-        read = (Button) findViewById(R.id.reader);
-
         toSee = (TextView) findViewById(R.id.toSeeAText);
 
-        DBHelper dbHelper = new DBHelper(this);
-
-        SQLiteDatabase database = dbHelper.getWritableDatabase();
-
-        ContentValues contentValues = new ContentValues();
 
         Intent intent = new Intent(this, MainActivity3.class);
-
-
 
 
         TextWatcher textWatcher = new TextWatcher() {
@@ -64,38 +60,66 @@ public class MainActivity2 extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                    if(!tvA.getText().toString().equals("") && !tvB.getText().toString().equals("") && !tvC.getText().toString().equals("")) {
+                    if(!tvA.getText().toString().trim().equals("") && !tvB.getText().toString().trim().equals("") && !tvC.getText().toString().trim().equals("")) {
                         a = Integer.parseInt(tvA.getText().toString());
                         b = Integer.parseInt(tvB.getText().toString());
                         c = Integer.parseInt(tvC.getText().toString());
-                        contentValues.put(DBHelper.KEY_A, a);
-                        contentValues.put(DBHelper.KEY_B, b);
-                        contentValues.put(DBHelper.KEY_C, c);
-                        database.insert(DBHelper.TABLE_ABC, null, contentValues);
-                        toSee.setText(Discriminant.discText(a, b, c));
+                        toSee.setText(Discriminant.discText(a,b,c));
+                        cv.put(DBHelper.KEY_A,a);
+                        cv.put(DBHelper.KEY_B,b);
+                        cv.put(DBHelper.KEY_C,c);
+                        database.insert(DBHelper.TABLE_DISCRIMINANT, null, cv);
 
-
-                        Cursor cursor = database.query(DBHelper.TABLE_ABC, null,null,null,null,null,null);
+                        Cursor cursor = database.query(DBHelper.TABLE_DISCRIMINANT,null,null,null,null,null,null);
                         if(cursor.moveToFirst())
                         {
-                            int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
-                            int aIndex = cursor.getColumnIndex(DBHelper.KEY_A);
-                            int bIndex = cursor.getColumnIndex(DBHelper.KEY_B);
-                            int cIndex = cursor.getColumnIndex(DBHelper.KEY_C);
-                            do {
-                                String tmpString = "\n" + cursor.getInt(idIndex) + ": a = " + cursor.getInt(aIndex) + ", b = " + cursor.getInt(bIndex)
-                                        + ", c = " + cursor.getInt(cIndex);
-                                accumulate += tmpString;
-                            }
-                            while (cursor.moveToNext());
-                            cursor.close();
-                            intent.putExtra("historyText", accumulate);
+                            do{
+                                int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
+                                int aIndex = cursor.getColumnIndex(DBHelper.KEY_A);
+                                int bIndex = cursor.getColumnIndex(DBHelper.KEY_B);
+                                int cIndex = cursor.getColumnIndex(DBHelper.KEY_C);
+                               accumulate += cursor.getInt(idIndex) + ": " + cursor.getString(aIndex) +
+                                       ", " + cursor.getString(bIndex) + ", " + cursor.getString(cIndex) + "\n";
+
+
+                            }while(cursor.moveToNext());
                         }
+                        cursor.close();
+
                     }
 
 
+
+                    if(tvA.getText().toString().trim().equals("") || tvB.getText().toString().trim().equals("") || tvC.getText().toString().trim().equals("")) {
+
+                        String untypedA = "";
+                        String untypedB = "";
+                        String untypedC = "";
+
+
+
+                        if(tvA.getText().toString().trim().equals(""))
+                        {
+                            untypedA = "a ";
+                        }
+                        if(tvB.getText().toString().trim().equals(""))
+                        {
+
+                            untypedB = " b";
+
+                        }
+                        if(tvC.getText().toString().trim().equals(""))
+                        {
+                            untypedC = " c";
+                        }
+                        String untypedText = "Введите " + untypedA + untypedB + untypedC;
+                        toSee.setText(untypedText);
+                    }
             }
         };
+
+
+
         tvA.addTextChangedListener(textWatcher);
         tvB.addTextChangedListener(textWatcher);
         tvC.addTextChangedListener(textWatcher);

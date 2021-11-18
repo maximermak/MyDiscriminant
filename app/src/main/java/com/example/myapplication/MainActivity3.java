@@ -3,6 +3,8 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -12,18 +14,26 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity3 extends AppCompatActivity {
 
-FloatingActionButton nextPage, lastPage;
-
- TextView history;
+FloatingActionButton nextPage, lastPage, deleteButton;
+String fullHistory;
+String accumulate = "";
+TextView history;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
 
+
+        DBHelper dbHelper = new DBHelper(this);
+
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
         nextPage = (FloatingActionButton) findViewById(R.id.page2_3);
 
         lastPage = (FloatingActionButton) findViewById(R.id.page2_1);
+
+        deleteButton = (FloatingActionButton) findViewById(R.id.deleteButton);
 
         Intent intent1 = new Intent(this, MainActivity2.class);
 
@@ -31,9 +41,35 @@ FloatingActionButton nextPage, lastPage;
 
        history = (TextView) findViewById(R.id.myHistory);
 
-        String historyWrite = getIntent().getStringExtra("historyText");
+       deleteButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               database.delete(DBHelper.TABLE_DISCRIMINANT,null,null);
+               history.setText("");
+           }
+       });
 
-        history.setText(historyWrite);
+
+
+        Cursor cursor = database.query(DBHelper.TABLE_DISCRIMINANT,null,null,null,null,null,null);
+        if(cursor.moveToFirst())
+        {
+            do{
+                int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
+                int aIndex = cursor.getColumnIndex(DBHelper.KEY_A);
+                int bIndex = cursor.getColumnIndex(DBHelper.KEY_B);
+                int cIndex = cursor.getColumnIndex(DBHelper.KEY_C);
+                accumulate += cursor.getInt(idIndex) + ": " + cursor.getString(aIndex) +
+                        ", " + cursor.getString(bIndex) + ", " + cursor.getString(cIndex) + "\n";
+            }while(cursor.moveToNext());
+        }
+        else{
+            accumulate = "";
+        }
+        history.setText(accumulate);
+        cursor.close();
+
+
 
         nextPage.setOnClickListener(new View.OnClickListener() {
             @Override
